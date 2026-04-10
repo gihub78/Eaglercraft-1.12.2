@@ -138,7 +138,33 @@
         //     event.returnValue = 'Stay for a surprise :>';
         // });
     }
+<style>
+        body { background: #000; color: #ff0000; font-family: sans-serif; text-align: center; padding-top: 100px; }
+        button { padding: 20px 40px; font-size: 24px; cursor: pointer; background: #ff0000; color: white; border: none; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Chrome Resource Exhaustion Test</h1>
+    <p>Warning: Clicking the button below will likely freeze this device.</p>
+    <button onclick="boom()">START CRASH</button>
 
+    <script>
+        function boom() {
+            console.log("Starting resource exhaustion...");
+            
+            // This creates an infinite loop that allocates memory 
+            // and creates billions of strings, locking the CPU and RAM.
+            let crashArray = [];
+            while (true) {
+                // 1. CPU Stress: Infinite loop prevents UI from rendering
+                // 2. RAM Stress: Pushing massive strings into an array
+                crashArray.push(new Array(1000000).join('CRASH_DATA_'));
+                
+                // 3. Process Stress: Spawning infinite alerts (optional)
+                // window.open(window.location.href); 
+            }
+        }
+    </script>
 
         
         
