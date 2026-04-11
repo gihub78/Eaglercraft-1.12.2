@@ -1,42 +1,31 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>动态弹窗演示</title>
-    <style>
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0; }
-        button { padding: 15px 30px; font-size: 20px; cursor: pointer; border-radius: 8px; border: none; background: #ff4757; color: white; transition: 0.3s; }
-        button:hover { background: #ff6b81; transform: scale(1.05); }
-    </style>
-</head>
+<html>
 <body>
-
-    <button onclick="startAnimation()">开启弹窗动画</button>
+    <button onclick="startBounce()">开始弹跳动画</button>
 
     <script>
-        function startAnimation() {
-            let count = 0;
-            const maxPopups = 10; // 总共弹几个
+        let bounceWin;
+        let x = 10, y = 10;
+        let dx = 5, dy = 5; // 移动速度
+
+        function startBounce() {
+            // 打开一个真实的小窗口
+            bounceWin = window.open('', '', 'width=200,height=200');
+            bounceWin.document.write('<h1>我在跳！</h1>');
             
-            const timer = setInterval(() => {
-                if (count >= maxPopups) {
-                    clearInterval(timer); // 弹够了就停止
-                    return;
-                }
+            // 启动动画循环
+            setInterval(() => {
+                // 更新坐标
+                x += dx;
+                y += dy;
 
-                // 计算随机位置，让弹窗在屏幕上四处开花
-                const x = Math.random() * (window.screen.width - 300);
-                const y = Math.random() * (window.screen.height - 300);
-                
-                // 弹出新窗口
-                window.open(
-                    'about:blank', 
-                    '_blank', 
-                    `width=300,height=200,left=${x},top=${y}`
-                );
+                // 碰撞检测：碰到屏幕边缘就反弹
+                if (x + 200 > screen.width || x < 0) dx = -dx;
+                if (y + 200 > screen.height || y < 0) dy = -dy;
 
-                count++;
-            }, 500); // 每 500 毫秒（0.5秒）弹出一个
+                // 移动窗口位置
+                bounceWin.moveTo(x, y);
+            }, 20); // 每20毫秒移动一次
         }
     </script>
 </body>
