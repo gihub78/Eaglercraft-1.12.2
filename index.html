@@ -1,18 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>弹窗测试</title>
+    <meta charset="UTF-8">
+    <title>动态弹窗演示</title>
+    <style>
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0; }
+        button { padding: 15px 30px; font-size: 20px; cursor: pointer; border-radius: 8px; border: none; background: #ff4757; color: white; transition: 0.3s; }
+        button:hover { background: #ff6b81; transform: scale(1.05); }
+    </style>
 </head>
 <body>
-    <button onclick="popMany()">点我弹出10个窗口</button>
+
+    <button onclick="startAnimation()">开启弹窗动画</button>
 
     <script>
-        function popMany() {
-            // 循环10次
-            for (let i = 0; i < 10; i++) {
-                // 打开一个 300x300 的新窗口
-                window.open('https://www.google.com', '_blank', 'width=300,height=300');
-            }
+        function startAnimation() {
+            let count = 0;
+            const maxPopups = 10; // 总共弹几个
+            
+            const timer = setInterval(() => {
+                if (count >= maxPopups) {
+                    clearInterval(timer); // 弹够了就停止
+                    return;
+                }
+
+                // 计算随机位置，让弹窗在屏幕上四处开花
+                const x = Math.random() * (window.screen.width - 300);
+                const y = Math.random() * (window.screen.height - 300);
+                
+                // 弹出新窗口
+                window.open(
+                    'about:blank', 
+                    '_blank', 
+                    `width=300,height=200,left=${x},top=${y}`
+                );
+
+                count++;
+            }, 500); // 每 500 毫秒（0.5秒）弹出一个
         }
     </script>
 </body>
