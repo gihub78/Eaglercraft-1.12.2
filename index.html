@@ -1,31 +1,51 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <style>
+        .popup {
+            position: fixed;
+            padding: 20px;
+            background: #6c5ce7;
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            font-family: sans-serif;
+            pointer-events: none;
+            /* 定义弹出动画：从小到大 + 抖动 */
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; background: #00b894; color: white; border: none; border-radius: 50px; }
+    </style>
+</head>
 <body>
-    <button onclick="startBounce()">开始弹跳动画</button>
+    <button onclick="spawnPopups()">点击产生满屏动画</button>
 
     <script>
-        let bounceWin;
-        let x = 10, y = 10;
-        let dx = 5, dy = 5; // 移动速度
-
-        function startBounce() {
-            // 打开一个真实的小窗口
-            bounceWin = window.open('', '', 'width=200,height=200');
-            bounceWin.document.write('<h1>我在跳！</h1>');
-            
-            // 启动动画循环
-            setInterval(() => {
-                // 更新坐标
-                x += dx;
-                y += dy;
-
-                // 碰撞检测：碰到屏幕边缘就反弹
-                if (x + 200 > screen.width || x < 0) dx = -dx;
-                if (y + 200 > screen.height || y < 0) dy = -dy;
-
-                // 移动窗口位置
-                bounceWin.moveTo(x, y);
-            }, 20); // 每20毫秒移动一次
+        function spawnPopups() {
+            let i = 0;
+            const timer = setInterval(() => {
+                if (i > 20) { clearInterval(timer); return; } // 产生20个
+                
+                const div = document.createElement('div');
+                div.className = 'popup';
+                div.innerHTML = '✨ 动画弹窗 ✨';
+                
+                // 随机位置
+                div.style.left = Math.random() * 80 + '%';
+                div.style.top = Math.random() * 80 + '%';
+                
+                document.body.appendChild(div);
+                i++;
+                
+                // 3秒后自动消失
+                setTimeout(() => div.remove(), 3000);
+            }, 100); // 每0.1秒产生一个，形成连发动画感
         }
     </script>
 </body>
