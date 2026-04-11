@@ -1,77 +1,81 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Stacking Windows</title>
+    <title>路径后乱弹动画</title>
     <style>
-        body { 
-            margin: 0; background: #2c3e50; 
-            display: flex; flex-direction: column; align-items: center; 
-            height: 100vh; font-family: sans-serif; 
+        body { margin: 0; overflow: hidden; background: #008080; height: 100vh; }
+        .btn { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; padding: 15px 30px; cursor: pointer; background: #c0c0c0; border: 2px solid #000; font-weight: bold; }
+        
+        .fake-win {
+            position: absolute; width: 200px; height: 120px;
+            background: #f0f0f0; border: 2px solid #000; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; z-index: 10;
         }
-        .controls { position: fixed; top: 20px; z-index: 1000; }
-        button { 
-            padding: 15px 30px; font-size: 18px; cursor: pointer; 
-            background: #27ae60; color: white; border: none; border-radius: 5px;
-            box-shadow: 0 4px #219150;
-        }
-        button:active { transform: translateY(2px); box-shadow: 0 2px #219150; }
-
-        /* 弹窗样式 */
-        .fake-window {
-            position: absolute; width: 300px; height: 100px;
-            background: #ecf0f1; border: 1px solid #bdc3c7;
-            border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column;
-            /* 出现时的动画：渐显并稍微下滑 */
-            animation: slideDown 0.3s ease-out forwards;
-        }
-
-        .window-header { height: 25px; background: #34495e; color: white; display: flex; align-items: center; padding: 0 10px; font-size: 12px; border-radius: 4px 4px 0 0; }
-        .window-body { flex: 1; display: flex; align-items: center; justify-content: center; color: #333; font-weight: bold; }
-
-        @keyframes slideDown {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
+        .header { height: 25px; background: #000080; color: white; display: flex; align-items: center; padding: 0 5px; font-size: 12px; }
+        .body { flex: 1; background: white; display: flex; align-items: center; justify-content: center; font-size: 30px; }
     </style>
 </head>
 <body>
 
-    <div class="controls">
-        <button onclick="stackWindow()">点击向下弹窗</button>
-        <button onclick="location.reload()" style="background:#c0392b; box-shadow: 0 4px #a93226;">清空</button>
-    </div>
+    <button class="btn" onclick="startLegacy()">启动任务</button>
 
     <script>
-        let windowCount = 0;
-        const startTop = 80;  // 第一个弹窗距离顶部的距离
-        const startLeft = 50; // 距离左侧的距离
-        const gap = 110;      // 每个弹窗之间的垂直间距（略大于窗口高度）
-
-        function stackWindow() {
+        function startLegacy() {
             const win = document.createElement('div');
-            win.className = 'fake-window';
-            
-            // 计算位置：每次点击，Top值增加
-            const currentTop = startTop + (windowCount * gap);
-            const currentLeft = startLeft;
-
-            win.style.top = currentTop + 'px';
-            win.style.left = currentLeft + 'px';
-            
-            win.innerHTML = `
-                <div class="window-header">系统通知 #${windowCount + 1}</div>
-                <div class="window-body">我是第 ${windowCount + 1} 个弹窗</div>
-            `;
-
+            win.className = 'fake-win';
+            win.innerHTML = `<div class="header">任务运行中...</div><div class="body">🛸</div>`;
             document.body.appendChild(win);
-            windowCount++;
 
-            // 如果弹窗超出屏幕底端，可以自动滚动或提醒
-            if (currentTop + 100 > window.innerHeight) {
-                console.log("已经弹到底部了！");
+            const w = 200, h = 120;
+            const screenW = window.innerWidth - w;
+            const screenH = window.innerHeight - h;
+
+            // 你的指定路径
+            const path = [
+                {x: 0, y: 0},               // 左上
+                {x: screenW, y: screenH},   // 右下
+                {x: screenW/2, y: 0},       // 上面
+                {x: screenW/2, y: screenH}, // 下面
+                {x: screenW, y: 0},         // 右上
+                {x: 0, y: screenH}          // 左下
+            ];
+
+            let step = 0;
+            let curX = path[0].x, curY = path[0].y;
+            let dx = 0, dy = 0; // 用于后续乱弹的速度
+
+            function animate() {
+                if (step < path.length - 1) {
+                    // --- 阶段 1: 路径滑行 ---
+                    const target = path[step + 1];
+                    const dist = Math.sqrt(Math.pow(target.x - curX, 2) + Math.pow(target.y - curY, 2));
+                    
+                    if (dist > 10) {
+                        curX += (target.x - curX) / 15; // 平滑移动
+                        curY += (target.y - curY) / 15;
+                    } else {
+                        step++; // 到达一个点，目标切换到下一个
+                    }
+                } else {
+                    // --- 阶段 2: 屏幕乱弹 ---
+                    if (dx === 0 && dy === 0) { // 初始化乱弹速度
+                        dx = 8; dy = 6;
+                    }
+                    curX += dx;
+                    curY += dy;
+
+                    // 碰撞检测
+                    if (curX <= 0 || curX >= screenW) dx *= -1;
+                    if (curY <= 0 || curY >= screenH) dy *= -1;
+                }
+
+                win.style.left = curX + 'px';
+                win.style.top = curY + 'px';
+                requestAnimationFrame(animate);
             }
+
+            animate();
         }
     </script>
 </body>
