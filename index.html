@@ -2,81 +2,83 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>路径后乱弹动画</title>
+    <title>Stationary Path Stack</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #008080; height: 100vh; }
-        .btn { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; padding: 15px 30px; cursor: pointer; background: #c0c0c0; border: 2px solid #000; font-weight: bold; }
-        
-        .fake-win {
-            position: absolute; width: 200px; height: 120px;
-            background: #f0f0f0; border: 2px solid #000; box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column; z-index: 10;
+        body { 
+            margin: 0; background: #008080; /* Win95 Teal */
+            height: 100vh; overflow: hidden; font-family: sans-serif;
         }
-        .header { height: 25px; background: #000080; color: white; display: flex; align-items: center; padding: 0 5px; font-size: 12px; }
-        .body { flex: 1; background: white; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+        .controls { 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+            z-index: 9999; 
+        }
+        button { 
+            padding: 15px 30px; font-size: 18px; cursor: pointer; 
+            background: #c0c0c0; border: 2px solid #000;
+            box-shadow: inset -2px -2px #808080, inset 2px 2px #fff;
+        }
+        button:active { box-shadow: inset 2px 2px #808080, inset -2px -2px #fff; }
+
+        /* Fake Window Look */
+        .fake-window {
+            position: absolute; width: 220px; height: 140px;
+            background: #f0f0f0; border: 2px solid #000;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column;
+        }
+        .header { height: 25px; background: #000080; color: white; padding: 0 10px; font-size: 12px; display: flex; align-items: center; }
+        .body { flex: 1; background: white; display: flex; align-items: center; justify-content: center; font-size: 30px; border: 1px inset #808080; margin: 2px; }
     </style>
 </head>
 <body>
 
-    <button class="btn" onclick="startLegacy()">启动任务</button>
+    <div class="controls">
+        <button onclick="spawnNext()">点一下弹一个 (遵循路径)</button>
+        <button onclick="location.reload()" style="background:#ff4757; color:white;">重置</button>
+    </div>
 
     <script>
-        function startLegacy() {
-            const win = document.createElement('div');
-            win.className = 'fake-win';
-            win.innerHTML = `<div class="header">任务运行中...</div><div class="body">🛸</div>`;
-            document.body.appendChild(win);
+        let step = 0;
+        const w = 220; // Window Width
+        const h = 140; // Window Height
 
-            const w = 200, h = 120;
+        function spawnNext() {
+            // Screen boundaries
             const screenW = window.innerWidth - w;
             const screenH = window.innerHeight - h;
 
-            // 你的指定路径
-            const path = [
-                {x: 0, y: 0},               // 左上
-                {x: screenW, y: screenH},   // 右下
-                {x: screenW/2, y: 0},       // 上面
-                {x: screenW/2, y: screenH}, // 下面
-                {x: screenW, y: 0},         // 右上
-                {x: 0, y: screenH}          // 左下
+            // Your specific path sequence
+            const pathPoints = [
+                { x: 0, y: 0 },                  // 1. 左上角
+                { x: screenW, y: screenH },      // 2. 右下角
+                { x: screenW / 2, y: 0 },        // 3. 上面 (居中)
+                { x: screenW / 2, y: screenH },   // 4. 下面 (居中)
+                { x: screenW, y: 0 },            // 5. 右上角
+                { x: 0, y: screenH }             // 6. 左下角
             ];
 
-            let step = 0;
-            let curX = path[0].x, curY = path[0].y;
-            let dx = 0, dy = 0; // 用于后续乱弹的速度
+            // Get current target point (Loop back to start if finished)
+            const point = pathPoints[step % pathPoints.length];
 
-            function animate() {
-                if (step < path.length - 1) {
-                    // --- 阶段 1: 路径滑行 ---
-                    const target = path[step + 1];
-                    const dist = Math.sqrt(Math.pow(target.x - curX, 2) + Math.pow(target.y - curY, 2));
-                    
-                    if (dist > 10) {
-                        curX += (target.x - curX) / 15; // 平滑移动
-                        curY += (target.y - curY) / 15;
-                    } else {
-                        step++; // 到达一个点，目标切换到下一个
-                    }
-                } else {
-                    // --- 阶段 2: 屏幕乱弹 ---
-                    if (dx === 0 && dy === 0) { // 初始化乱弹速度
-                        dx = 8; dy = 6;
-                    }
-                    curX += dx;
-                    curY += dy;
+            const win = document.createElement('div');
+            win.className = 'fake-window';
+            
+            // Apply coordinates directly (STATIONARY)
+            win.style.left = point.x + 'px';
+            win.style.top = point.y + 'px';
+            
+            // Add a higher z-index so the newest is always on top
+            win.style.zIndex = step;
 
-                    // 碰撞检测
-                    if (curX <= 0 || curX >= screenW) dx *= -1;
-                    if (curY <= 0 || curY >= screenH) dy *= -1;
-                }
+            win.innerHTML = `
+                <div class="header">弹窗 #${step + 1}</div>
+                <div class="body">📁</div>
+            `;
 
-                win.style.left = curX + 'px';
-                win.style.top = curY + 'px';
-                requestAnimationFrame(animate);
-            }
-
-            animate();
+            document.body.appendChild(win);
+            step++;
         }
     </script>
 </body>
 </html>
+
