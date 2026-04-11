@@ -1,82 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <title>Stacking Windows</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #1a1a2e; height: 100vh; font-family: sans-serif; }
-        .controls { position: absolute; z-index: 999; top: 20px; left: 50%; transform: translateX(-50%); }
-        button { padding: 15px 30px; cursor: pointer; font-weight: bold; background: #e94560; color: white; border: none; border-radius: 5px; }
-
-        .fake-window {
-            position: absolute; width: 220px; height: 150px;
-            background: #f0f0f0; border: 2px solid #333; border-radius: 5px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5); pointer-events: none;
-            display: flex; flex-direction: column; transition: transform 0.1s linear;
+        body { 
+            margin: 0; background: #2c3e50; 
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100vh; font-family: sans-serif; 
         }
-        .header { height: 25px; background: #000080; color: white; padding: 0 10px; display: flex; align-items: center; font-size: 12px; }
-        .body { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 30px; background: white; }
+        .controls { position: fixed; top: 20px; z-index: 1000; }
+        button { 
+            padding: 15px 30px; font-size: 18px; cursor: pointer; 
+            background: #27ae60; color: white; border: none; border-radius: 5px;
+            box-shadow: 0 4px #219150;
+        }
+        button:active { transform: translateY(2px); box-shadow: 0 2px #219150; }
+
+        /* 弹窗样式 */
+        .fake-window {
+            position: absolute; width: 300px; height: 100px;
+            background: #ecf0f1; border: 1px solid #bdc3c7;
+            border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column;
+            /* 出现时的动画：渐显并稍微下滑 */
+            animation: slideDown 0.3s ease-out forwards;
+        }
+
+        .window-header { height: 25px; background: #34495e; color: white; display: flex; align-items: center; padding: 0 10px; font-size: 12px; border-radius: 4px 4px 0 0; }
+        .window-body { flex: 1; display: flex; align-items: center; justify-content: center; color: #333; font-weight: bold; }
+
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
 
-<div class="controls">
-    <button onclick="spawnPathWindow()">启动路径弹窗 (平滑不瞬移)</button>
-</div>
+    <div class="controls">
+        <button onclick="stackWindow()">点击向下弹窗</button>
+        <button onclick="location.reload()" style="background:#c0392b; box-shadow: 0 4px #a93226;">清空</button>
+    </div>
 
-<script>
-    function spawnPathWindow() {
-        const win = document.createElement('div');
-        win.className = 'fake-window';
-        win.innerHTML = `<div class="header">巡航任务</div><div class="body">🛸</div>`;
-        document.body.appendChild(win);
+    <script>
+        let windowCount = 0;
+        const startTop = 80;  // 第一个弹窗距离顶部的距离
+        const startLeft = 50; // 距离左侧的距离
+        const gap = 110;      // 每个弹窗之间的垂直间距（略大于窗口高度）
 
-        // 窗口尺寸
-        const w = 220; const h = 150;
-        const screenW = window.innerWidth - w;
-        const screenH = window.innerHeight - h;
+        function stackWindow() {
+            const win = document.createElement('div');
+            win.className = 'fake-window';
+            
+            // 计算位置：每次点击，Top值增加
+            const currentTop = startTop + (windowCount * gap);
+            const currentLeft = startLeft;
 
-        // 定义你的指定路径点 (X, Y)
-        const path = [
-            { x: 0, y: 0 },              // 左上角 (起点)
-            { x: screenW, y: screenH },  // 右下角
-            { x: screenW / 2, y: 0 },    // 上面 (居中)
-            { x: screenW / 2, y: screenH }, // 下面 (居中)
-            { x: screenW, y: 0 },        // 右上角
-            { x: 0, y: screenH }         // 左下角
-        ];
+            win.style.top = currentTop + 'px';
+            win.style.left = currentLeft + 'px';
+            
+            win.innerHTML = `
+                <div class="window-header">系统通知 #${windowCount + 1}</div>
+                <div class="window-body">我是第 ${windowCount + 1} 个弹窗</div>
+            `;
 
-        let currentStep = 0;
-        let posX = path[0].x;
-        let posY = path[0].y;
-        
-        // 初始位置设定 (防止瞬移)
-        win.style.left = posX + 'px';
-        win.style.top = posY + 'px';
+            document.body.appendChild(win);
+            windowCount++;
 
-        function move() {
-            if (currentStep >= path.length - 1) return; // 完成路径
-
-            const target = path[currentStep + 1];
-            const dx = target.x - posX;
-            const dy = target.y - posY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const speed = 8; // 移动速度
-
-            if (distance > speed) {
-                posX += (dx / distance) * speed;
-                posY += (dy / distance) * speed;
-                win.style.left = posX + 'px';
-                win.style.top = posY + 'px';
-                requestAnimationFrame(move);
-            } else {
-                // 到达一个点，转向下一个
-                currentStep++;
-                requestAnimationFrame(move);
+            // 如果弹窗超出屏幕底端，可以自动滚动或提醒
+            if (currentTop + 100 > window.innerHeight) {
+                console.log("已经弹到底部了！");
             }
         }
-
-        requestAnimationFrame(move);
-    }
-</script>
+    </script>
 </body>
 </html>
