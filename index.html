@@ -1,43 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Explosion Test</title>
+    <title>Chaos Burst</title>
     <style>
-        body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        button { padding: 30px 60px; font-size: 30px; cursor: pointer; background: red; color: white; border-radius: 50px; }
+        body { background: #111; color: #00ff00; text-align: center; padding-top: 100px; font-family: monospace; }
+        button { 
+            padding: 30px 60px; font-size: 25px; cursor: pointer; 
+            background: #00ff00; color: #000; border: none; border-radius: 10px;
+            box-shadow: 0 0 20px #00ff00; font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <button onclick="startChaos()">点我：允许后再次点击</button>
+    <h1>SYSTEM OVERLOAD SIMULATOR</h1>
+    <p>If only 1 pops up, check the URL bar for a "Blocked" icon!</p>
+    <button onclick="triggerExplosion()">START EXPLOSION</button>
 
     <script>
-        function startChaos() {
-            // 尝试弹出 10 个
-            for (let i = 0; i < 10; i++) {
-                const angle = (i / 10) * Math.PI * 2;
-                const x = (screen.width / 2) + Math.cos(angle) * 10;
-                const y = (screen.height / 2) + Math.sin(angle) * 10;
-                
-                // 核心：给每个窗口一个唯一的名称（第二个参数）
-                const win = window.open('about:blank', 'win' + i, `width=200,height=150,left=${x},top=${y}`);
-                
-                if (win) {
-                    animateWin(win, angle);
-                }
+        function triggerExplosion() {
+            const total = 12; // Let's try 12 windows
+            
+            for (let i = 0; i < total; i++) {
+                // We add a slight delay for each window (i * 100ms)
+                // This tricks some browsers into thinking they are separate actions
+                setTimeout(() => {
+                    spawnWindow(i, total);
+                }, i * 150); 
             }
         }
 
-        function animateWin(win, angle) {
-            let dist = 0;
-            const speed = 15;
-            const timer = setInterval(() => {
-                if (win.closed) { clearInterval(timer); return; }
-                dist += speed;
-                const curX = (screen.width / 2) + Math.cos(angle) * dist;
-                const curY = (screen.height / 2) + Math.sin(angle) * dist;
-                win.moveTo(curX, curY);
-                if (dist > 1000) { clearInterval(timer); win.close(); }
-            }, 16);
+        function spawnWindow(index, total) {
+            const angle = (index / total) * Math.PI * 2;
+            const startX = screen.width / 2;
+            const startY = screen.height / 2;
+
+            // Unique window name 'w' + index is mandatory
+            const win = window.open('', 'w' + index, `width=200,height=150,left=${startX},top=${startY}`);
+
+            if (win) {
+                win.document.write(`<body style="background:hsl(${index * 30}, 70%, 50%);"></body>`);
+                
+                let distance = 0;
+                const move = setInterval(() => {
+                    if (win.closed) { clearInterval(move); return; }
+                    
+                    distance += 15;
+                    const curX = startX + Math.cos(angle) * distance;
+                    const curY = startY + Math.sin(angle) * distance;
+                    
+                    win.moveTo(curX, curY);
+
+                    // Stop after moving 600 pixels
+                    if (distance > 600) clearInterval(move);
+                }, 16);
+            }
         }
     </script>
 </body>
