@@ -2,119 +2,127 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Window Animation Chaos</title>
+    <title>Realistic Window Chaos</title>
     <style>
         body { 
-            margin: 0; overflow: hidden; background: #1a1a2e; 
+            margin: 0; overflow: hidden; background: #008080; /* 经典 Win95 背景色 */
             display: flex; flex-direction: column; justify-content: center; 
-            align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif;
+            align-items: center; height: 100vh; font-family: 'Segoe UI', Tahoma, sans-serif;
         }
         
-        .controls { z-index: 999; display: flex; gap: 20px; }
+        .controls { z-index: 9999; display: flex; gap: 20px; background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; }
 
         .btn {
             padding: 15px 30px; font-size: 18px; font-weight: bold;
-            cursor: pointer; border: none; border-radius: 8px; transition: 0.2s;
+            cursor: pointer; border: 2px solid #000; border-radius: 4px; background: #c0c0c0;
+            box-shadow: inset -2px -2px #808080, inset 2px 2px #fff;
         }
-        #start { background: #e94560; color: white; box-shadow: 0 0 15px #e94560; }
-        #stop { background: #0f3460; color: white; border: 1px solid #e94560; }
-        .btn:active { transform: scale(0.95); }
+        .btn:active { box-shadow: inset 2px 2px #808080, inset -2px -2px #fff; }
 
-        /* Simulated Window Style */
+        /* 逼真的仿真窗口 */
         .fake-window {
-            position: absolute;
-            width: 200px; height: 150px;
-            background: #fff; border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
-            overflow: hidden; pointer-events: none;
-            /* Entry Animation */
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: absolute; width: 250px; height: 180px;
+            background: #f0f0f0; border: 2px solid #000;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; pointer-events: auto;
         }
 
-        .window-header { height: 25px; background: #333; display: flex; align-items: center; padding: 0 10px; gap: 5px; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
-        .red { background: #ff5f56; } .yellow { background: #ffbd2e; } .green { background: #27c93f; }
-        .window-body { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 40px; }
-
-        @keyframes popIn {
-            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        /* 标题栏设计 */
+        .window-header { 
+            height: 30px; background: linear-gradient(90deg, #000080, #1084d0); 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 5px; color: white; font-size: 12px; font-weight: bold;
         }
+        .window-controls { display: flex; gap: 2px; }
+        .win-btn { 
+            width: 16px; height: 14px; background: #c0c0c0; border: 1px solid #000;
+            box-shadow: inset -1px -1px #808080, inset 1px 1px #fff;
+            color: black; font-size: 10px; display: flex; align-items: center; justify-content: center;
+        }
+
+        .window-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; margin: 2px; border: 1px inset #808080; }
+        .window-body span { font-size: 40px; margin-bottom: 10px; }
+        .window-body p { font-size: 14px; color: #333; margin: 0; }
     </style>
 </head>
 <body>
 
     <div class="controls">
-        <button id="start" class="btn" onclick="startChaos()">🔥 开启无限弹窗</button>
-        <button id="stop" class="btn" onclick="stopChaos()">🛑 停止并清理</button>
+        <button class="btn" onclick="startChaos()">🔥 开启反弹乱斗</button>
+        <button class="btn" onclick="stopChaos()">🛑 紧急停止</button>
     </div>
 
     <script>
         let interval = null;
-        const emojis = ['🚀', '✨', '🔥', '💎', '🌈', '🧨', '⚡️', '👾'];
+        const windowWidth = 250;
+        const windowHeight = 180;
 
         function startChaos() {
             if (interval) return;
-            
-            interval = setInterval(() => {
-                createWindow();
-            }, 200); // Create a new "window" every 200ms
+            interval = setInterval(() => createWindow(), 400); 
         }
 
         function createWindow() {
             const win = document.createElement('div');
             win.className = 'fake-window';
             
-            // Random color and content
-            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            // 随机内容
+            const icons = ['💾', '📂', '⚙️', '🖱️', '🖥️', '⚠️'];
+            const icon = icons[Math.floor(Math.random() * icons.length)];
+            
             win.innerHTML = `
                 <div class="window-header">
-                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                    <span>系统警告 - 0x000${Math.floor(Math.random()*999)}</span>
+                    <div class="window-controls">
+                        <div class="win-btn">_</div>
+                        <div class="win-btn">□</div>
+                        <div class="win-btn">×</div>
+                    </div>
                 </div>
-                <div class="window-body">${randomEmoji}</div>
+                <div class="window-body">
+                    <span>${icon}</span>
+                    <p>正在执行反弹任务...</p>
+                </div>
             `;
 
-            // Start position (Center)
-            const startX = window.innerWidth / 2 - 100;
-            const startY = window.innerHeight / 2 - 75;
-            win.style.left = startX + 'px';
-            win.style.top = startY + 'px';
+            // 初始随机位置和随机速度
+            let x = Math.random() * (window.innerWidth - windowWidth);
+            let y = Math.random() * (window.innerHeight - windowHeight);
+            let dx = (Math.random() - 0.5) * 10;
+            let dy = (Math.random() - 0.5) * 10;
 
             document.body.appendChild(win);
 
-            // Explosion Logic
-            const angle = Math.random() * Math.PI * 2;
-            const speed = 5 + Math.random() * 10;
-            let curX = startX;
-            let curY = startY;
-
+            // 反弹核心算法
             const move = setInterval(() => {
-                curX += Math.cos(angle) * speed;
-                curY += Math.sin(angle) * speed;
-                
-                win.style.left = curX + 'px';
-                win.style.top = curY + 'px';
+                x += dx;
+                y += dy;
 
-                // Fade out as it goes away
-                const dist = Math.hypot(curX - startX, curY - startY);
-                if (dist > 600) {
-                    win.style.opacity = 1 - (dist - 600) / 400;
+                // 碰到左右边缘反弹
+                if (x <= 0 || x + windowWidth >= window.innerWidth) {
+                    dx *= -1;
+                    x = x <= 0 ? 0 : window.innerWidth - windowWidth;
+                }
+                // 碰到上下边缘反弹
+                if (y <= 0 || y + windowHeight >= window.innerHeight) {
+                    dy *= -1;
+                    y = y <= 0 ? 0 : window.innerHeight - windowHeight;
                 }
 
-                // Remove when off-screen
-                if (dist > 1000) {
-                    clearInterval(move);
-                    win.remove();
-                }
+                win.style.left = x + 'px';
+                win.style.top = y + 'px';
             }, 16);
+
+            win.dataset.timerId = move; // 绑定定时器ID以便后续清理
         }
 
         function stopChaos() {
             clearInterval(interval);
             interval = null;
-            // Clean up all existing windows
-            document.querySelectorAll('.fake-window').forEach(el => el.remove());
+            document.querySelectorAll('.fake-window').forEach(win => {
+                clearInterval(parseInt(win.dataset.timerId));
+                win.remove();
+            });
         }
     </script>
 </body>
