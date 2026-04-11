@@ -1,59 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chaos Burst</title>
+    <title>Infinite Window Burst</title>
     <style>
-        body { background: #111; color: #00ff00; text-align: center; padding-top: 100px; font-family: monospace; }
-        button { 
-            padding: 30px 60px; font-size: 25px; cursor: pointer; 
-            background: #00ff00; color: #000; border: none; border-radius: 10px;
-            box-shadow: 0 0 20px #00ff00; font-weight: bold;
+        body { 
+            background: #1e1e26; color: white; font-family: 'Segoe UI', sans-serif;
+            display: flex; flex-direction: column; justify-content: center; 
+            align-items: center; height: 100vh; gap: 20px;
         }
+        .btn {
+            padding: 20px 40px; font-size: 22px; font-weight: bold;
+            cursor: pointer; border: none; border-radius: 12px; transition: 0.3s;
+        }
+        #start { background: #ff4757; color: white; box-shadow: 0 0 20px #ff4757; }
+        #stop { background: #2f3542; color: white; border: 2px solid white; }
+        #start:hover { transform: scale(1.1); background: #ff6b81; }
+        #stop:hover { background: white; color: black; }
     </style>
 </head>
 <body>
-    <h1>SYSTEM OVERLOAD SIMULATOR</h1>
-    <p>If only 1 pops up, check the URL bar for a "Blocked" icon!</p>
-    <button onclick="triggerExplosion()">START EXPLOSION</button>
+
+    <h1>🔥 Infinite Window Chaos 🔥</h1>
+    <button id="start" class="btn" onclick="startInfinite()">开始疯狂弹窗 (Start)</button>
+    <button id="stop" class="btn" onclick="stopAll()">关闭所有窗口 (Stop All)</button>
 
     <script>
-        function triggerExplosion() {
-            const total = 12; // Let's try 12 windows
-            
-            for (let i = 0; i < total; i++) {
-                // We add a slight delay for each window (i * 100ms)
-                // This tricks some browsers into thinking they are separate actions
-                setTimeout(() => {
-                    spawnWindow(i, total);
-                }, i * 150); 
-            }
+        let popupInterval = null;
+        let windowList = []; // Track all opened windows to close them later
+        let counter = 0;
+
+        function startInfinite() {
+            if (popupInterval) return; // Don't start twice
+
+            // Start sending popups every 300ms
+            popupInterval = setInterval(() => {
+                const angle = Math.random() * Math.PI * 2;
+                const centerX = screen.width / 2;
+                const centerY = screen.height / 2;
+
+                // Open a new window
+                const winName = 'win' + counter++;
+                const win = window.open('', winName, `width=250,height=200,left=${centerX},top=${centerY}`);
+
+                if (win) {
+                    windowList.push(win); // Add to our list
+                    win.document.write(`<body style="background:hsl(${Math.random()*360},70%,60%); display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif;"><h2>WEEEEE!</h2></body>`);
+                    
+                    // Add the "Scatter Animation"
+                    animateExit(win, angle);
+                } else {
+                    // If blocked, stop and warn
+                    clearInterval(popupInterval);
+                    popupInterval = null;
+                    alert("⚠️ 被浏览器拦截了！请在地址栏点击‘始终允许弹出窗口’后重试。");
+                }
+            }, 300); 
         }
 
-        function spawnWindow(index, total) {
-            const angle = (index / total) * Math.PI * 2;
-            const startX = screen.width / 2;
-            const startY = screen.height / 2;
-
-            // Unique window name 'w' + index is mandatory
-            const win = window.open('', 'w' + index, `width=200,height=150,left=${startX},top=${startY}`);
-
-            if (win) {
-                win.document.write(`<body style="background:hsl(${index * 30}, 70%, 50%);"></body>`);
+        function animateExit(win, angle) {
+            let dist = 0;
+            const speed = 10 + Math.random() * 10;
+            const timer = setInterval(() => {
+                if (win.closed) { clearInterval(timer); return; }
+                dist += speed;
+                const curX = (screen.width / 2 - 125) + Math.cos(angle) * dist;
+                const curY = (screen.height / 2 - 100) + Math.sin(angle) * dist;
+                win.moveTo(curX, curY);
                 
-                let distance = 0;
-                const move = setInterval(() => {
-                    if (win.closed) { clearInterval(move); return; }
-                    
-                    distance += 15;
-                    const curX = startX + Math.cos(angle) * distance;
-                    const curY = startY + Math.sin(angle) * distance;
-                    
-                    win.moveTo(curX, curY);
+                // Stop moving if it goes too far
+                if (dist > 1200) clearInterval(timer);
+            }, 16);
+        }
 
-                    // Stop after moving 600 pixels
-                    if (distance > 600) clearInterval(move);
-                }, 16);
-            }
+        function stopAll() {
+            // 1. Stop the generator
+            clearInterval(popupInterval);
+            popupInterval = null;
+
+            // 2. Close every window we opened
+            windowList.forEach(win => {
+                if (!win.closed) win.close();
+            });
+
+            // 3. Clear the list
+            windowList = [];
+            alert("✅ Chaos Stopped. All windows cleared!");
         }
     </script>
 </body>
