@@ -1,72 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>Multiverse Bouncing Windows</title>
+    <meta charset="UTF-8">
+    <title>Window Explosion Animation</title>
     <style>
         body { 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; background: #2f3542; color: white; font-family: sans-serif;
+            background: #1a1a2e; color: #e94560; 
+            display: flex; flex-direction: column; justify-content: center; 
+            align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif;
         }
+        h1 { margin-bottom: 20px; text-shadow: 0 0 10px #e94560; }
         button { 
-            padding: 20px 40px; font-size: 24px; cursor: pointer; 
-            background: #ff4757; border: none; border-radius: 50px; color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s;
+            padding: 25px 50px; font-size: 28px; font-weight: bold;
+            cursor: pointer; background: #e94560; color: white;
+            border: none; border-radius: 12px; box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+            transition: 0.3s;
         }
-        button:hover { transform: scale(1.1); background: #ff6b81; }
+        button:hover { transform: scale(1.1) rotate(2deg); background: #ff5e78; }
     </style>
 </head>
 <body>
 
-    <button onclick="launchChaos()">🔥 点击开启 10 个弹跳窗口 🔥</button>
+    <h1>💥 窗口大爆炸 💥</h1>
+    <button onclick="explode()">按一下，全散开！</button>
 
     <script>
-        function launchChaos() {
-            // Number of windows to spawn
-            for (let i = 0; i < 10; i++) {
-                createBouncer();
-            }
-        }
+        function explode() {
+            const count = 20; // Number of windows
+            const centerX = screen.width / 2 - 100;
+            const centerY = screen.height / 2 - 100;
 
-        function createBouncer() {
-            // Initial random position
-            let x = Math.random() * (screen.width - 250);
-            let y = Math.random() * (screen.height - 250);
-            
-            // Random speed and direction for each window
-            let dx = (Math.random() - 0.5) * 20; 
-            let dy = (Math.random() - 0.5) * 20;
+            for (let i = 0; i < count; i++) {
+                // Calculate explosion angle (360 degrees / count)
+                const angle = (i / count) * Math.PI * 2;
+                const speed = 15 + Math.random() * 10; // Random speed for variety
+                
+                const vx = Math.cos(angle) * speed;
+                const vy = Math.sin(angle) * speed;
 
-            // Open the window
-            const win = window.open('', '', `width=250,height=200,left=${x},top=${y}`);
-            
-            if (!win) {
-                alert("请在浏览器上方点击‘始终允许弹出窗口’，否则动画无法显示！");
-                return;
-            }
-
-            // Style the popup content
-            win.document.write(`
-                <body style="background:#747d8c; color:white; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                    <h2 style="font-family:sans-serif;">🚀 BOUNCING!</h2>
-                </body>
-            `);
-
-            // Animation loop for this specific window
-            const interval = setInterval(() => {
-                if (win.closed) {
-                    clearInterval(interval);
+                // Create the popup at the center
+                const win = window.open('', '', `width=200,height=150,left=${centerX},top=${centerY}`);
+                
+                if (!win) {
+                    alert("⚠️ 拦截提醒：请在地址栏点击‘始终允许弹出窗口’并刷新！");
                     return;
                 }
 
-                x += dx;
-                y += dy;
+                win.document.write(`
+                    <body style="background:#e94560; color:white; display:flex; align-items:center; justify-content:center; margin:0; font-family:sans-serif;">
+                        <h2 style="font-size:40px;">🔥</h2>
+                    </body>
+                `);
 
-                // Wall collision detection
-                if (x + 250 > screen.width || x < 0) dx = -dx;
-                if (y + 200 > screen.height || y < 0) dy = -dy;
+                // Animate the scatter
+                let curX = centerX;
+                let curY = centerY;
 
-                win.moveTo(x, y);
-            }, 20);
+                const moveInterval = setInterval(() => {
+                    if (win.closed) {
+                        clearInterval(moveInterval);
+                        return;
+                    }
+
+                    curX += vx;
+                    curY += vy;
+
+                    // Bounce back if they hit screen edges
+                    if (curX + 200 > screen.width || curX < 0) { /* Optional: Stop or Bounce */ }
+                    
+                    win.moveTo(curX, curY);
+
+                    // Optional: Stop moving after they go off-screen or travel far
+                    if (curX < -300 || curX > screen.width + 300 || curY < -300 || curY > screen.height + 300) {
+                        clearInterval(moveInterval);
+                        win.close(); // Automatically close when far away
+                    }
+                }, 16);
+            }
         }
     </script>
 </body>
