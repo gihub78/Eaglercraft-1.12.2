@@ -1,90 +1,120 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>Infinite Window Burst</title>
+    <meta charset="UTF-8">
+    <title>Window Animation Chaos</title>
     <style>
         body { 
-            background: #1e1e26; color: white; font-family: 'Segoe UI', sans-serif;
+            margin: 0; overflow: hidden; background: #1a1a2e; 
             display: flex; flex-direction: column; justify-content: center; 
-            align-items: center; height: 100vh; gap: 20px;
+            align-items: center; height: 100vh; font-family: 'Segoe UI', sans-serif;
         }
+        
+        .controls { z-index: 999; display: flex; gap: 20px; }
+
         .btn {
-            padding: 20px 40px; font-size: 22px; font-weight: bold;
-            cursor: pointer; border: none; border-radius: 12px; transition: 0.3s;
+            padding: 15px 30px; font-size: 18px; font-weight: bold;
+            cursor: pointer; border: none; border-radius: 8px; transition: 0.2s;
         }
-        #start { background: #ff4757; color: white; box-shadow: 0 0 20px #ff4757; }
-        #stop { background: #2f3542; color: white; border: 2px solid white; }
-        #start:hover { transform: scale(1.1); background: #ff6b81; }
-        #stop:hover { background: white; color: black; }
+        #start { background: #e94560; color: white; box-shadow: 0 0 15px #e94560; }
+        #stop { background: #0f3460; color: white; border: 1px solid #e94560; }
+        .btn:active { transform: scale(0.95); }
+
+        /* Simulated Window Style */
+        .fake-window {
+            position: absolute;
+            width: 200px; height: 150px;
+            background: #fff; border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+            overflow: hidden; pointer-events: none;
+            /* Entry Animation */
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .window-header { height: 25px; background: #333; display: flex; align-items: center; padding: 0 10px; gap: 5px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .red { background: #ff5f56; } .yellow { background: #ffbd2e; } .green { background: #27c93f; }
+        .window-body { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>🔥 Infinite Window Chaos 🔥</h1>
-    <button id="start" class="btn" onclick="startInfinite()">开始疯狂弹窗 (Start)</button>
-    <button id="stop" class="btn" onclick="stopAll()">关闭所有窗口 (Stop All)</button>
+    <div class="controls">
+        <button id="start" class="btn" onclick="startChaos()">🔥 开启无限弹窗</button>
+        <button id="stop" class="btn" onclick="stopChaos()">🛑 停止并清理</button>
+    </div>
 
     <script>
-        let popupInterval = null;
-        let windowList = []; // Track all opened windows to close them later
-        let counter = 0;
+        let interval = null;
+        const emojis = ['🚀', '✨', '🔥', '💎', '🌈', '🧨', '⚡️', '👾'];
 
-        function startInfinite() {
-            if (popupInterval) return; // Don't start twice
-
-            // Start sending popups every 300ms
-            popupInterval = setInterval(() => {
-                const angle = Math.random() * Math.PI * 2;
-                const centerX = screen.width / 2;
-                const centerY = screen.height / 2;
-
-                // Open a new window
-                const winName = 'win' + counter++;
-                const win = window.open('', winName, `width=250,height=200,left=${centerX},top=${centerY}`);
-
-                if (win) {
-                    windowList.push(win); // Add to our list
-                    win.document.write(`<body style="background:hsl(${Math.random()*360},70%,60%); display:flex; align-items:center; justify-content:center; color:white; font-family:sans-serif;"><h2>WEEEEE!</h2></body>`);
-                    
-                    // Add the "Scatter Animation"
-                    animateExit(win, angle);
-                } else {
-                    // If blocked, stop and warn
-                    clearInterval(popupInterval);
-                    popupInterval = null;
-                    alert("⚠️ 被浏览器拦截了！请在地址栏点击‘始终允许弹出窗口’后重试。");
-                }
-            }, 300); 
+        function startChaos() {
+            if (interval) return;
+            
+            interval = setInterval(() => {
+                createWindow();
+            }, 200); // Create a new "window" every 200ms
         }
 
-        function animateExit(win, angle) {
-            let dist = 0;
-            const speed = 10 + Math.random() * 10;
-            const timer = setInterval(() => {
-                if (win.closed) { clearInterval(timer); return; }
-                dist += speed;
-                const curX = (screen.width / 2 - 125) + Math.cos(angle) * dist;
-                const curY = (screen.height / 2 - 100) + Math.sin(angle) * dist;
-                win.moveTo(curX, curY);
+        function createWindow() {
+            const win = document.createElement('div');
+            win.className = 'fake-window';
+            
+            // Random color and content
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+            win.innerHTML = `
+                <div class="window-header">
+                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                </div>
+                <div class="window-body">${randomEmoji}</div>
+            `;
+
+            // Start position (Center)
+            const startX = window.innerWidth / 2 - 100;
+            const startY = window.innerHeight / 2 - 75;
+            win.style.left = startX + 'px';
+            win.style.top = startY + 'px';
+
+            document.body.appendChild(win);
+
+            // Explosion Logic
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 5 + Math.random() * 10;
+            let curX = startX;
+            let curY = startY;
+
+            const move = setInterval(() => {
+                curX += Math.cos(angle) * speed;
+                curY += Math.sin(angle) * speed;
                 
-                // Stop moving if it goes too far
-                if (dist > 1200) clearInterval(timer);
+                win.style.left = curX + 'px';
+                win.style.top = curY + 'px';
+
+                // Fade out as it goes away
+                const dist = Math.hypot(curX - startX, curY - startY);
+                if (dist > 600) {
+                    win.style.opacity = 1 - (dist - 600) / 400;
+                }
+
+                // Remove when off-screen
+                if (dist > 1000) {
+                    clearInterval(move);
+                    win.remove();
+                }
             }, 16);
         }
 
-        function stopAll() {
-            // 1. Stop the generator
-            clearInterval(popupInterval);
-            popupInterval = null;
-
-            // 2. Close every window we opened
-            windowList.forEach(win => {
-                if (!win.closed) win.close();
-            });
-
-            // 3. Clear the list
-            windowList = [];
-            alert("✅ Chaos Stopped. All windows cleared!");
+        function stopChaos() {
+            clearInterval(interval);
+            interval = null;
+            // Clean up all existing windows
+            document.querySelectorAll('.fake-window').forEach(el => el.remove());
         }
     </script>
 </body>
