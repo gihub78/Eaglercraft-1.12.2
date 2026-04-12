@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <title>Fake Virus Popup Storm</title>
     <style>
+        .center-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 3px 3px 0px black;
+    pointer-events: none; /* 不挡住弹窗 */
+    z-index: 1;
+}
         body { 
             margin: 0; background: #008080;
             height: 100vh; overflow: hidden; font-family: sans-serif;
@@ -11,23 +23,31 @@
 
         /* Fake Window Look */
         .fake-window {
-            position: absolute; width: 240px; height: 160px;
-            background: #f0f0f0; border: 2px solid #000;
+            position: absolute; 
+            width: 240px; 
+            height: 160px;
+            background: #f0f0f0; 
+            border: 2px solid #000;
             box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
-            display: flex; flex-direction: column;
-            animation: flicker 0.2s infinite alternate;
+            display: flex; 
+            flex-direction: column;
         }
 
         .header { 
-            height: 25px; background: #800000; 
-            color: white; padding: 0 10px; 
-            font-size: 12px; display: flex; align-items: center; 
+            height: 25px; 
+            background: #800000; 
+            color: white; 
+            padding: 0 10px; 
+            font-size: 12px; 
+            display: flex; 
+            align-items: center; 
             justify-content: space-between;
         }
 
         .close-btn {
             background: #ff4444;
-            width: 18px; height: 18px;
+            width: 18px; 
+            height: 18px;
             text-align: center;
             line-height: 18px;
             cursor: pointer;
@@ -36,15 +56,16 @@
         }
 
         .body { 
-            flex: 1; background: white; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 22px; border: 1px inset #808080; margin: 2px; 
-            color: red; font-weight: bold;
-        }
-
-        @keyframes flicker {
-            0% { opacity: 1; }
-            100% { opacity: 0.85; }
+            flex: 1; 
+            background: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 22px; 
+            border: 1px inset #808080; 
+            margin: 2px; 
+            color: red; 
+            font-weight: bold;
         }
     </style>
 </head>
@@ -55,10 +76,10 @@
     const w = 240;
     const h = 160;
 
-    /* ---------------- 自动循环弹窗 ---------------- */
+    /* ---------------- 打开网页自动循环弹窗 ---------------- */
     function autoSpawn() {
         spawnRandomWindow();
-        setTimeout(autoSpawn, 20); // 每 0.5 秒弹一个（可调）
+        setTimeout(autoSpawn, 500); // 每 0.5 秒弹一个（可调）
     }
 
     /* ---------------- 随机位置生成弹窗 ---------------- */
@@ -106,3 +127,4 @@
 </script>
 
 </body>
+</html>
