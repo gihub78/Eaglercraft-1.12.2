@@ -77,10 +77,10 @@
     const w = 240;
     const h = 160;
 
-    /* ---------------- 打开网页自动循环弹窗 ---------------- */
+    /* ---------------- 打开网页自动无限弹 ---------------- */
     function autoSpawn() {
         spawnRandomWindow();
-        setTimeout(autoSpawn, 1); // 每 0.5 秒弹一个（可调）
+        setTimeout(autoSpawn, 50); // 每 0.05 秒弹一个（越小越卡）
     }
 
     /* ---------------- 随机位置生成弹窗 ---------------- */
@@ -91,7 +91,7 @@
         step++;
     }
 
-    /* ---------------- 创建弹窗 ---------------- */
+    /* ---------------- 创建弹窗（永不删除） ---------------- */
     function createWindow(x, y) {
         const win = document.createElement('div');
         win.className = 'fake-window';
@@ -104,7 +104,7 @@
                 Alert #${step}
                 <div class="close-btn" onclick="explodeWindows(event)">X</div>
             </div>
-            <div class="body">Virus Intrusion in Progress</div>
+            <div class="body">⚠️ Threat</div>
         `;
 
         document.body.appendChild(win);
@@ -114,8 +114,8 @@
     function explodeWindows(event) {
         event.stopPropagation();
 
-        // 每次点击生成 5 个随机弹窗
-        for (let i = 0; i < 5; i++) {
+        // 每次点击生成 20 个（越大越卡）
+        for (let i = 0; i < 20; i++) {
             const x = Math.random() * (window.innerWidth - w);
             const y = Math.random() * (window.innerHeight - h);
             createWindow(x, y);
@@ -125,13 +125,6 @@
 
     /* ---------------- 打开网页就开始 ---------------- */
     window.onload = autoSpawn;
-
-    function limitWindows() {
-    const wins = document.querySelectorAll('.fake-window');
-    if (wins.length > 200) {
-        wins[0].remove(); // 删除最早的一个
-    }
-}
 </script>
 
 </body>
