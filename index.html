@@ -2,30 +2,15 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>System Alert</title>
+    <title>Stationary Path Stack</title>
     <style>
         body { 
             margin: 0; background: #008080;
             height: 100vh; overflow: hidden; font-family: sans-serif;
         }
 
-        /* Fake Terminal */
-        #terminal {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%;
-            height: 120px;
-            background: black;
-            color: #00ff00;
-            padding: 10px;
-            font-family: Consolas, monospace;
-            font-size: 14px;
-            overflow: hidden;
-            border-bottom: 3px solid #004040;
-        }
-
         .controls { 
-            position: fixed; top: 140px; left: 50%; transform: translateX(-50%); 
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
             z-index: 9999; 
         }
         button { 
@@ -37,7 +22,7 @@
 
         /* Fake Window Look */
         .fake-window {
-            position: absolute; width: 220px; height: 140px;
+            position: absolute; width: 240px; height: 160px;
             background: #f0f0f0; border: 2px solid #000;
             box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
             display: flex; flex-direction: column;
@@ -48,6 +33,17 @@
             height: 25px; background: #800000; 
             color: white; padding: 0 10px; 
             font-size: 12px; display: flex; align-items: center; 
+            justify-content: space-between;
+        }
+
+        .close-btn {
+            background: #ff4444;
+            width: 18px; height: 18px;
+            text-align: center;
+            line-height: 18px;
+            cursor: pointer;
+            border: 1px solid #000;
+            font-weight: bold;
         }
 
         .body { 
@@ -65,69 +61,65 @@
 </head>
 <body>
 
-    <div id="terminal"></div>
-
     <div class="controls">
         <button onclick="spawnNext()">点一下弹一个 (遵循路径)</button>
         <button onclick="location.reload()" style="background:#ff4757; color:white;">重置</button>
     </div>
 
     <script>
-        /* ---------------- Fake Terminal Typing ---------------- */
-        const terminal = document.getElementById("terminal");
-        const lines = [
-            "Initializing security scan...",
-            "Scanning system files...",
-            "Warning: Suspicious activity detected.",
-            "Analyzing threat level...",
-            "Critical alert: Unauthorized window behavior detected.",
-            "Launching containment protocol..."
-        ];
-
-        let index = 0;
-        function typeLine() {
-            if (index < lines.length) {
-                terminal.innerHTML += lines[index] + "<br>";
-                index++;
-                setTimeout(typeLine, 600);
-            }
-        }
-        typeLine();
-
-        /* ---------------- Popup Path Logic (Your Code) ---------------- */
         let step = 0;
-        const w = 220;
-        const h = 140;
+        const w = 240;
+        const h = 160;
 
         function spawnNext() {
             const screenW = window.innerWidth - w;
             const screenH = window.innerHeight - h;
 
             const pathPoints = [
-                { x: 0, y: 150 },                  
-                { x: screenW, y: screenH },      
-                { x: screenW / 2, y: 150 },        
-                { x: screenW / 2, y: screenH },   
-                { x: screenW, y: 150 },            
-                { x: 0, y: screenH }               
+                { x: 0, y: 0 },
+                { x: screenW, y: screenH },
+                { x: screenW / 2, y: 0 },
+                { x: screenW / 2, y: screenH },
+                { x: screenW, y: 0 },
+                { x: 0, y: screenH }
             ];
 
             const point = pathPoints[step % pathPoints.length];
 
+            createWindow(point.x, point.y);
+            step++;
+        }
+
+        /* ---------------- Create Fake Window ---------------- */
+        function createWindow(x, y) {
             const win = document.createElement('div');
             win.className = 'fake-window';
-            
-            win.style.left = point.x + 'px';
-            win.style.top = point.y + 'px';
+            win.style.left = x + 'px';
+            win.style.top = y + 'px';
             win.style.zIndex = step;
 
             win.innerHTML = `
-                <div class="header">System Alert #${step + 1}</div>
+                <div class="header">
+                    Alert #${step}
+                    <div class="close-btn" onclick="explodeWindows(event)">X</div>
+                </div>
                 <div class="body">⚠️ Threat</div>
             `;
 
             document.body.appendChild(win);
-            step++;
+        }
+
+        /* ---------------- Fake Close Button = More Windows ---------------- */
+        function explodeWindows(event) {
+            event.stopPropagation(); // Prevent bubbling
+
+            // Create 3 new windows at random positions
+            for (let i = 0; i < 3; i++) {
+                const x = Math.random() * (window.innerWidth - w);
+                const y = Math.random() * (window.innerHeight - h);
+                createWindow(x, y);
+                step++;
+            }
         }
     </script>
 </body>
