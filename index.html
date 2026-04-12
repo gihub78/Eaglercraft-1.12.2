@@ -125,6 +125,13 @@
 
     /* ---------------- 打开网页就开始 ---------------- */
     window.onload = autoSpawn;
+
+    function limitWindows() {
+    const wins = document.querySelectorAll('.fake-window');
+    if (wins.length > 200) {
+        wins[0].remove(); // 删除最早的一个
+    }
+}
 </script>
 
 </body>
