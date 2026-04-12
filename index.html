@@ -2,14 +2,30 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Stationary Path Stack</title>
+    <title>System Alert</title>
     <style>
         body { 
-            margin: 0; background: #008080; /* Win95 Teal */
+            margin: 0; background: #008080;
             height: 100vh; overflow: hidden; font-family: sans-serif;
         }
+
+        /* Fake Terminal */
+        #terminal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 120px;
+            background: black;
+            color: #00ff00;
+            padding: 10px;
+            font-family: Consolas, monospace;
+            font-size: 14px;
+            overflow: hidden;
+            border-bottom: 3px solid #004040;
+        }
+
         .controls { 
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%); 
+            position: fixed; top: 140px; left: 50%; transform: translateX(-50%); 
             z-index: 9999; 
         }
         button { 
@@ -25,12 +41,31 @@
             background: #f0f0f0; border: 2px solid #000;
             box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
             display: flex; flex-direction: column;
+            animation: flicker 0.2s infinite alternate;
         }
-        .header { height: 25px; background: #000080; color: white; padding: 0 10px; font-size: 12px; display: flex; align-items: center; }
-        .body { flex: 1; background: white; display: flex; align-items: center; justify-content: center; font-size: 30px; border: 1px inset #808080; margin: 2px; }
+
+        .header { 
+            height: 25px; background: #800000; 
+            color: white; padding: 0 10px; 
+            font-size: 12px; display: flex; align-items: center; 
+        }
+
+        .body { 
+            flex: 1; background: white; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 22px; border: 1px inset #808080; margin: 2px; 
+            color: red; font-weight: bold;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 1; }
+            100% { opacity: 0.85; }
+        }
     </style>
 </head>
 <body>
+
+    <div id="terminal"></div>
 
     <div class="controls">
         <button onclick="spawnNext()">点一下弹一个 (遵循路径)</button>
@@ -38,41 +73,57 @@
     </div>
 
     <script>
+        /* ---------------- Fake Terminal Typing ---------------- */
+        const terminal = document.getElementById("terminal");
+        const lines = [
+            "Initializing security scan...",
+            "Scanning system files...",
+            "Warning: Suspicious activity detected.",
+            "Analyzing threat level...",
+            "Critical alert: Unauthorized window behavior detected.",
+            "Launching containment protocol..."
+        ];
+
+        let index = 0;
+        function typeLine() {
+            if (index < lines.length) {
+                terminal.innerHTML += lines[index] + "<br>";
+                index++;
+                setTimeout(typeLine, 600);
+            }
+        }
+        typeLine();
+
+        /* ---------------- Popup Path Logic (Your Code) ---------------- */
         let step = 0;
-        const w = 220; // Window Width
-        const h = 140; // Window Height
+        const w = 220;
+        const h = 140;
 
         function spawnNext() {
-            // Screen boundaries
             const screenW = window.innerWidth - w;
             const screenH = window.innerHeight - h;
 
-            // Your specific path sequence
             const pathPoints = [
-                { x: 0, y: 0 },                  // 1. 左上角
-                { x: screenW, y: screenH },      // 2. 右下角
-                { x: screenW / 2, y: 0 },        // 3. 上面 (居中)
-                { x: screenW / 2, y: screenH },   // 4. 下面 (居中)
-                { x: screenW, y: 0 },            // 5. 右上角
-                { x: 0, y: screenH }             // 6. 左下角
+                { x: 0, y: 150 },                  
+                { x: screenW, y: screenH },      
+                { x: screenW / 2, y: 150 },        
+                { x: screenW / 2, y: screenH },   
+                { x: screenW, y: 150 },            
+                { x: 0, y: screenH }               
             ];
 
-            // Get current target point (Loop back to start if finished)
             const point = pathPoints[step % pathPoints.length];
 
             const win = document.createElement('div');
             win.className = 'fake-window';
             
-            // Apply coordinates directly (STATIONARY)
             win.style.left = point.x + 'px';
             win.style.top = point.y + 'px';
-            
-            // Add a higher z-index so the newest is always on top
             win.style.zIndex = step;
 
             win.innerHTML = `
-                <div class="header">弹窗 #${step + 1}</div>
-                <div class="body">📁</div>
+                <div class="header">System Alert #${step + 1}</div>
+                <div class="body">⚠️ Threat</div>
             `;
 
             document.body.appendChild(win);
@@ -81,4 +132,3 @@
     </script>
 </body>
 </html>
-
