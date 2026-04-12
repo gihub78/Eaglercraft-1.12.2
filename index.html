@@ -66,61 +66,50 @@
         <button onclick="location.reload()" style="background:#ff4757; color:white;">重置</button>
     </div>
 
-    <script>
-        let step = 0;
-        const w = 240;
-        const h = 160;
+<script>
+    let step = 0;
+    const w = 240;
+    const h = 160;
 
-        function spawnNext() {
-            const screenW = window.innerWidth - w;
-            const screenH = window.innerHeight - h;
+    /* ---------------- 随机位置生成弹窗 ---------------- */
+    function spawnNext() {
+        const x = Math.random() * (window.innerWidth - w);
+        const y = Math.random() * (window.innerHeight - h);
+        createWindow(x, y);
+        step++;
+    }
 
-            const pathPoints = [
-                { x: 0, y: 0 },
-                { x: screenW, y: screenH },
-                { x: screenW / 2, y: 0 },
-                { x: screenW / 2, y: screenH },
-                { x: screenW, y: 0 },
-                { x: 0, y: screenH }
-            ];
+    /* ---------------- 创建弹窗 ---------------- */
+    function createWindow(x, y) {
+        const win = document.createElement('div');
+        win.className = 'fake-window';
+        win.style.left = x + 'px';
+        win.style.top = y + 'px';
+        win.style.zIndex = step;
 
-            const point = pathPoints[step % pathPoints.length];
+        win.innerHTML = `
+            <div class="header">
+                Alert #${step}
+                <div class="close-btn" onclick="explodeWindows(event)">X</div>
+            </div>
+            <div class="body">⚠️ Threat</div>
+        `;
 
-            createWindow(point.x, point.y);
+        document.body.appendChild(win);
+    }
+
+    /* ---------------- 假关闭按钮：生成更多弹窗 ---------------- */
+    function explodeWindows(event) {
+        event.stopPropagation();
+
+        // 每次点击生成 5 个随机弹窗
+        for (let i = 0; i < 5; i++) {
+            const x = Math.random() * (window.innerWidth - w);
+            const y = Math.random() * (window.innerHeight - h);
+            createWindow(x, y);
             step++;
         }
-
-        /* ---------------- Create Fake Window ---------------- */
-        function createWindow(x, y) {
-            const win = document.createElement('div');
-            win.className = 'fake-window';
-            win.style.left = x + 'px';
-            win.style.top = y + 'px';
-            win.style.zIndex = step;
-
-            win.innerHTML = `
-                <div class="header">
-                    Alert #${step}
-                    <div class="close-btn" onclick="explodeWindows(event)">X</div>
-                </div>
-                <div class="body">⚠️ Threat</div>
-            `;
-
-            document.body.appendChild(win);
-        }
-
-        /* ---------------- Fake Close Button = More Windows ---------------- */
-        function explodeWindows(event) {
-            event.stopPropagation(); // Prevent bubbling
-
-            // Create 3 new windows at random positions
-            for (let i = 0; i < 3; i++) {
-                const x = Math.random() * (window.innerWidth - w);
-                const y = Math.random() * (window.innerHeight - h);
-                createWindow(x, y);
-                step++;
-            }
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
